@@ -6,7 +6,6 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 
 import java.util.Properties;
 
@@ -25,8 +24,8 @@ public class Stream {
         StreamsBuilder builder = new StreamsBuilder();
         // stream内置consumed
         KStream<String, String> simpleFirstStream = builder.stream(input, Consumed.with(stringSerde, stringSerde));
-        // 使用KStream.mapValues 大写
-        KStream<String, String> upperCasedStream = simpleFirstStream.mapValues(line -> line.toUpperCase());
+        // 使用KStream.mapValues 截取
+        KStream<String, String> upperCasedStream = simpleFirstStream.mapValues(line -> line.split("in:")[1]);
         // 把转换结果输出到另一个topic
         // stream内置produced
         upperCasedStream.to(output, Produced.with(stringSerde, stringSerde));
