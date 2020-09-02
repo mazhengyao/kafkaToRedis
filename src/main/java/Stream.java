@@ -18,17 +18,20 @@ public class Stream {
         Properties properties = new Properties();
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG,"StreamDemo");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
-        //使用Serdes类创建序列化/反序列化所需的Serde实例 Serdes类为以下类型提供默认的实现：String、Byte array、Long、Integer和Double。
+        // SerDes表示串行器和解串器。每个Kafka流都必须为记录的数据类型提供SerDes，并在必要时记录值以实现数据。
+        // 使用Serdes类创建序列化/反序列化所需的Serde实例 Serdes类为以下类型提供默认的实现：String、Byte array、Long、Integer和Double。
         Serde<String> stringSerde = Serdes.String();
 
         StreamsBuilder builder = new StreamsBuilder();
+        // stream内置consumed
         KStream<String, String> simpleFirstStream = builder.stream(input, Consumed.with(stringSerde, stringSerde));
-        // 使用KStream.mapValues 将输入数据流以 abc: 拆分获取下标为 1 字符串
+        // 使用KStream.mapValues 大写
         KStream<String, String> upperCasedStream = simpleFirstStream.mapValues(line -> line.toUpperCase());
         // 把转换结果输出到另一个topic
+        // stream内置produced
         upperCasedStream.to(output, Produced.with(stringSerde, stringSerde));
 
-        //创建和启动KStream
+        // 创建和启动KStream
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), properties);
         kafkaStreams.start();
     }
